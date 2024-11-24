@@ -1,12 +1,12 @@
 diff --git a/hw/arm/Kconfig b/hw/arm/Kconfig
-index 3ada335a24..4f5b5c2f2a 100644
+index 3ada335a24..64969eb157 100644
 --- a/hw/arm/Kconfig
 +++ b/hw/arm/Kconfig
 @@ -302,6 +302,12 @@ config STM32VLDISCOVERY
      depends on TCG && ARM
      select STM32F100_SOC
  
-+config STM32F407G_DISC1
++config STM32F407G_DISC
 +    bool
 +    default y
 +    depends on TCG && ARM
@@ -31,14 +31,14 @@ index 3ada335a24..4f5b5c2f2a 100644
      bool
      default y if PIXMAN
 diff --git a/hw/arm/meson.build b/hw/arm/meson.build
-index 68245d3ad1..28bfd4cd6e 100644
+index 68245d3ad1..1661a87017 100644
 --- a/hw/arm/meson.build
 +++ b/hw/arm/meson.build
 @@ -11,6 +11,7 @@ arm_ss.add(when: 'CONFIG_MICROBIT', if_true: files('microbit.c'))
  arm_ss.add(when: 'CONFIG_MUSICPAL', if_true: files('musicpal.c'))
  arm_ss.add(when: 'CONFIG_NETDUINO2', if_true: files('netduino2.c'))
  arm_ss.add(when: 'CONFIG_NETDUINOPLUS2', if_true: files('netduinoplus2.c'))
-+arm_ss.add(when: 'CONFIG_STM32F407G_DISC1', if_true: files('stm32f407g_disc1.c'))
++arm_ss.add(when: 'CONFIG_STM32F407G_DISC', if_true: files('stm32f407g_disc.c'))
  arm_ss.add(when: 'CONFIG_OLIMEX_STM32_H405', if_true: files('olimex-stm32-h405.c'))
  arm_ss.add(when: 'CONFIG_NPCM7XX', if_true: files('npcm7xx.c', 'npcm7xx_boards.c'))
  arm_ss.add(when: 'CONFIG_NSERIES', if_true: files('nseries.c'))
@@ -50,3 +50,127 @@ index 68245d3ad1..28bfd4cd6e 100644
  arm_ss.add(when: 'CONFIG_XLNX_ZYNQMP_ARM', if_true: files('xlnx-zynqmp.c', 'xlnx-zcu102.c'))
  arm_ss.add(when: 'CONFIG_XLNX_VERSAL', if_true: files('xlnx-versal.c', 'xlnx-versal-virt.c'))
  arm_ss.add(when: 'CONFIG_FSL_IMX25', if_true: files('fsl-imx25.c', 'imx25_pdk.c'))
+diff --git a/hw/arm/stm32f407_soc.c b/hw/arm/stm32f407_soc.c
+new file mode 100644
+index 0000000000..09b980c47f
+--- /dev/null
++++ b/hw/arm/stm32f407_soc.c
+@@ -0,0 +1,55 @@
++
++#include "qemu/osdep.h"
++
++#include "qapi/error.h"
++#include "exec/address-spaces.h"
++#include "sysemu/sysemu.h"
++
++#include "hw/misc/stm32f4xx_syscfg.h"
++#include "hw/timer/stm32f2xx_timer.h"
++#include "hw/char/stm32f2xx_usart.h"
++#include "hw/adc/stm32f2xx_adc.h"
++#include "hw/misc/stm32f4xx_exti.h"
++#include "hw/or-irq.h"
++#include "hw/ssi/stm32f2xx_spi.h"
++#include "hw/arm/armv7m.h"
++#include "qom/object.h"
++#include "hw/arm/stm32f407_soc.h"
++
++#define TYPE_STM32F407_SOC "stm32f407-soc"
++typedef struct
++{
++    SysBusDevice parent_obj;
++    ARMv7MState armv7m;
++} STM32F407State;
++
++static void stm32f407_soc_initfn(Object *obj)
++{
++    __LOG("Invoked!");
++};
++
++static void stm32f407_soc_class_init(ObjectClass *klass, void *data)
++{
++    __LOG("Invoked!");
++
++    // DeviceClass *dc = DEVICE_CLASS(klass);
++
++    // dc->realize = stm32f405_soc_realize;
++    /* No vmstate or reset required: device has no internal state */
++};
++
++static const TypeInfo stm32f407_soc_info = {
++    .name = TYPE_STM32F407_SOC,
++    .parent = TYPE_SYS_BUS_DEVICE,
++    .instance_size = sizeof(STM32F407State),
++    .instance_init = stm32f407_soc_initfn,
++    .class_init = stm32f407_soc_class_init,
++};
++
++static void stm32f407_soc_types(void)
++{
++    __LOG("Invoked!");
++    type_register_static(&stm32f407_soc_info);
++}
++
++type_init(stm32f407_soc_types);
+diff --git a/hw/arm/stm32f407g_disc.c b/hw/arm/stm32f407g_disc.c
+new file mode 100644
+index 0000000000..90ab6a0a93
+--- /dev/null
++++ b/hw/arm/stm32f407g_disc.c
+@@ -0,0 +1,41 @@
++#include "qemu/osdep.h"
++#include "qapi/error.h"
++#include "hw/boards.h"
++#include "hw/arm/boot.h"
++#include "hw/arm/armv7m.h"
++
++#include "hw/arm/stm32f407_soc.h"
++
++#define MACHINE_NAME "stm32f407g_disc-machine"
++
++static void stm32f407g_disc_init(MachineState *machine)
++{
++    __LOG("Invoked!");
++}
++
++static void stm32f407g_disc_class_init(ObjectClass *klass, void *data)
++{
++    __LOG("Invoked!");
++    MachineClass *mc = MACHINE_CLASS(klass);
++    mc->desc = "STM32F407G-DISCOVERY 1 Board (Cortex-M4)";
++
++    static const char *const valid_cpu_types[] = {
++        ARM_CPU_TYPE_NAME("cortex-m4"),
++        NULL};
++
++    mc->init = stm32f407g_disc_init;
++    mc->valid_cpu_types = valid_cpu_types;
++}
++
++static const TypeInfo stm32f407g_disc = {
++    .name = MACHINE_NAME,
++    .parent = TYPE_MACHINE,
++    .class_init = stm32f407g_disc_class_init};
++
++static void stm32f407g_disc_types(void)
++{
++    __LOG("Invoked!");
++    type_register_static(&stm32f407g_disc);
++}
++
++type_init(stm32f407g_disc_types)
+diff --git a/include/hw/arm/stm32f407_soc.h b/include/hw/arm/stm32f407_soc.h
+new file mode 100644
+index 0000000000..e8ef04a171
+--- /dev/null
++++ b/include/hw/arm/stm32f407_soc.h
+@@ -0,0 +1,4 @@
++#pragma once
++
++#define __LOG(fmt, ...) \
++    printf("%s:%d-%s: " fmt "\n", __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+diff --git a/roms/edk2 b/roms/edk2
+--- a/roms/edk2
++++ b/roms/edk2
+@@ -1 +1 @@
+-Subproject commit edc6681206c1a8791981a2f911d2fb8b3d2f5768
++Subproject commit edc6681206c1a8791981a2f911d2fb8b3d2f5768-dirty
