@@ -12,3 +12,5 @@ sudo apt-get install python3 python3-pip git libglib2.0-dev libfdt-dev \
 python3 -m pip install tomli
 
 git submodule update --init --recursive
+cd qemu
+git checkout stable-8.2

@@ -1,1 +1,7 @@
+*.o
+*.elf
+toolchain/
+*.map
+*.bin
 build/
+.vscode/

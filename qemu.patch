@@ -1,0 +1,52 @@
+diff --git a/hw/arm/Kconfig b/hw/arm/Kconfig
+index 3ada335a24..4f5b5c2f2a 100644
+--- a/hw/arm/Kconfig
++++ b/hw/arm/Kconfig
+@@ -302,6 +302,12 @@ config STM32VLDISCOVERY
+     depends on TCG && ARM
+     select STM32F100_SOC
+ 
++config STM32F407G_DISC1
++    bool
++    default y
++    depends on TCG && ARM
++    select STM32F407_SOC
++
+ config STRONGARM
+     bool
+     select PXA2XX
+@@ -448,6 +454,14 @@ config STM32F405_SOC
+     select STM32F4XX_SYSCFG
+     select STM32F4XX_EXTI
+ 
++config STM32F407_SOC
++    bool
++    default y
++    select ARM_V7M
++    select OR_IRQ
++    select STM32F4XX_SYSCFG
++    select STM32F4XX_EXTI
++
+ config XLNX_ZYNQMP_ARM
+     bool
+     default y if PIXMAN
+diff --git a/hw/arm/meson.build b/hw/arm/meson.build
+index 68245d3ad1..28bfd4cd6e 100644
+--- a/hw/arm/meson.build
++++ b/hw/arm/meson.build
+@@ -11,6 +11,7 @@ arm_ss.add(when: 'CONFIG_MICROBIT', if_true: files('microbit.c'))
+ arm_ss.add(when: 'CONFIG_MUSICPAL', if_true: files('musicpal.c'))
+ arm_ss.add(when: 'CONFIG_NETDUINO2', if_true: files('netduino2.c'))
+ arm_ss.add(when: 'CONFIG_NETDUINOPLUS2', if_true: files('netduinoplus2.c'))
++arm_ss.add(when: 'CONFIG_STM32F407G_DISC1', if_true: files('stm32f407g_disc1.c'))
+ arm_ss.add(when: 'CONFIG_OLIMEX_STM32_H405', if_true: files('olimex-stm32-h405.c'))
+ arm_ss.add(when: 'CONFIG_NPCM7XX', if_true: files('npcm7xx.c', 'npcm7xx_boards.c'))
+ arm_ss.add(when: 'CONFIG_NSERIES', if_true: files('nseries.c'))
+@@ -42,6 +43,7 @@ arm_ss.add(when: 'CONFIG_RASPI', if_true: files('bcm2836.c', 'raspi.c'))
+ arm_ss.add(when: 'CONFIG_STM32F100_SOC', if_true: files('stm32f100_soc.c'))
+ arm_ss.add(when: 'CONFIG_STM32F205_SOC', if_true: files('stm32f205_soc.c'))
+ arm_ss.add(when: 'CONFIG_STM32F405_SOC', if_true: files('stm32f405_soc.c'))
++arm_ss.add(when: 'CONFIG_STM32F407_SOC', if_true: files('stm32f407_soc.c'))
+ arm_ss.add(when: 'CONFIG_XLNX_ZYNQMP_ARM', if_true: files('xlnx-zynqmp.c', 'xlnx-zcu102.c'))
+ arm_ss.add(when: 'CONFIG_XLNX_VERSAL', if_true: files('xlnx-versal.c', 'xlnx-versal-virt.c'))
+ arm_ss.add(when: 'CONFIG_FSL_IMX25', if_true: files('fsl-imx25.c', 'imx25_pdk.c'))
