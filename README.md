@@ -11,3 +11,11 @@ cd build
 make -j4
 ./build/qemu-system-arm -machine stm32f407g_disc -kernel boot.elf
 ```
+
+## Make a patch file
+
+```bash
+cd qemu
+git add -N hw/arm/stm32f407g_disc.c
+git diff > ../qemu.patch
+```
