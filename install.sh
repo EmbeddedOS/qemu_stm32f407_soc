@@ -14,3 +14,4 @@ python3 -m pip install tomli
 git submodule update --init --recursive
 cd qemu
 git checkout stable-8.2
+git apply ../qemu.patch
